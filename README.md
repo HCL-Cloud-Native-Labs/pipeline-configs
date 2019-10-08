@@ -92,7 +92,7 @@ $ oc patch bc cotd-app -p '{"spec":{"source":{"git":{"ref":"feature"}}}}'
 ```bash
 $ oc start-build cotd-pipeline -n labs-ci-cd
 ```
-3. Once finished, you should now city cities:
+3. Once finished, you should now see cities:
 ![production-cities-screenshot.png](production-cities-screenshot.png)
 
 ## Uninstalling
