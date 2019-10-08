@@ -20,19 +20,20 @@ The diagram below depicts the general form of our application flow through the v
 ### Deploy pipeline definition and sample applications
 1. Clone this repository.
 2. Log on to an OpenShift server `oc login -u <user> https://<server>:<port>/`
-3. Set project to labs-ci-cd:
+3. Set project to `labs-ci-cd`:
 ```bash
 $ oc project labs-ci-cd
 ```
-3. Create pipeline itself using the following command
+4. Create pipeline itself using the following command
 ```bash
 $ oc create -n labs-ci-cd -f pipeline.yaml
 ```
-4. To deploy everything that we need for now, i.e. Jenkins, Sonarqube and Nexus, please run:
+4. Within `labs-dev` project, invoke new-app using the builder image and Git repository URL—remember to replace this with your Git repo. 
 ```bash
-$ ansible-playbook site.yml -e "include_tags=jenkins,sonarqube,nexus,tool-box,jenkins-slaves,rolebinding-group,rolebinding-jenkins,rolebinding-image-puller,ci,projects"
+$ oc project labs-dev
+$ oc new-app --name=cotd-app openshift/php:5.6~https://github.com/HCL-Cloud-Native-Labs/cotd.git#master
 ```
-5. Or to deploy everything, please run:
+5. Create a route, replacing the hostname with something appropriate for your environment:
 ```bash
 $ ansible-playbook site.yml
 ```
