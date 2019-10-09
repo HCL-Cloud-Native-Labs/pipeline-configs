@@ -95,17 +95,68 @@ $ oc start-build cotd-pipeline -n labs-ci-cd
 3. Once finished, you should now see cities:
 ![production-cities-screenshot.png](production-cities-screenshot.png)
 
+### Bonus: Configure Github webhooks
+Using [Ultrahook on OpenShift](https://github.com/AICoE/ultrahook-openshift), create and configure Github webhooks for triggering pipelines on code commits+pushes.
+1. Sign up for an account and create a unique namespace from the [Ultrahook site](http://www.ultrahook.com/), taking note the `generated_API_key` and `namespace`. You should get an email of these details.
+2. Clone ultrahook client on [OpenShift workspace](https://github.com/AICoE/ultrahook-openshift)
+3. Within `labs-ci-cd`, import template:
+```bash
+$ oc project labs-ci-cd
+$ oc apply -f openshift/ultrahook.app.yaml
+```
+4. Create an `encoded_key` using your `generated_API_key`:
+```bash
+$ echo -n "<generated_API_key>" | base64
+```
+5. Import API key secret, using your `encoded_key`:
+```bash
+$ oc process -f openshift/ultrahook.secret.yaml ULTRAHOOK_API_KEY='<encoded_key>' | oc apply -f -
+```
+6. Get `destination_url` and `the_rest_of_url` from the value of `Webhook GitHub:URL` within your build pipeline. The value of `destination_url` is the `https://<hostname>:<port>` and `the_rest_of_url` is everything until `/<secret>/github`
+```bash
+$ oc describe bc cotd-pipeline
+$ ...
+$    Webhook GitHub:
+$  	   URL:	https://openshift.uk.hclcnlabs.com:8443/apis/build.openshift.io/v1/namespaces/labs-ci-cd/buildconfigs/cotd-pipeline/webhooks/<secret>/github
+```
+7. Deploy ultrahook client, using your `destination_url` and `github` as your `some_subdomain`
+```bash
+$ oc process ultrahook ULTRAHOOK_SUBDOMAIN=<some_subdomain> ULTRAHOOK_DESTINATION=<destination_url> | oc apply -f -
+```
+8. Get `secret` which is the value of `spec.triggers.github.secret` within your build pipeline
+```bash
+$ oc get bc cotd-pipeline -o yaml
+$ ...
+$      triggers:
+$       - github:
+$           secret: secret101
+$ ...
+```
+9. Create your webhook on Github, setting the `url` to:
+```
+http://<some_subdomain>.<namespace>.ultrahook.com/<the_rest_of_url>/<secret>/github
+```
+which should look like:
+```
+http://github.hclcnlabs.ultrahook.com/apis/build.openshift.io/v1/namespaces/labs-ci-cd/buildconfigs/cotd-pipeline/webhooks/secret101/github
+```
+![github-webhook.png](github-webhook.png)
+10. Test by committing and pushing a code change.
+
+
 ## Uninstalling
 
-1. Delete the projects using the following commands:
+1. Delete the build pipeline the following commands:
 ```bash
-$ oc delete project labs-ci-cd
-$ oc delete project labs-dev
-$ oc delete project labs-test
-$ oc delete project labs-prod
+$ oc delete bc cotd-pipeline -n labs-ci-cd
 ```
-2. Delete persistent volumes using the following command:
+2. Delete deployment configuration using the following command:
 ```bash
-$ oc delete -f persistent-volume.yaml
+$ oc delete dc cotd-app -n labs-test
+$ oc delete dc cotd-app -n labs-prod
+```
+3. Delete the ultrahook stuff with the following commands:
+```bash
+$ oc delete all -l app=ultrahook -n labs-ci-cd
 ```
 
