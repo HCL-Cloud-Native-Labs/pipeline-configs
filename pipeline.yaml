@@ -17,28 +17,28 @@ spec:
     jenkinsPipelineStrategy:
     # node('slave/agent name') specificies name of jenkins slave/agent to be used during build
       jenkinsfile: "node('jenkins-slave-mvn') {\n  stage 'build & deploy in dev'\n  openshiftBuild(namespace:
-        'labs-dev',\n  \t\t\t    buildConfig: 'cotd-app',\n\t\t\t    showBuildLogs:
+        'baloise-dev',\n  \t\t\t    buildConfig: 'cotd-app',\n\t\t\t    showBuildLogs:
         'true',\n\t\t\t    waitTime: '3000000')\n  \n  stage 'verify deploy in dev'\n
-        \ openshiftVerifyDeployment(namespace: 'labs-dev',\n\t\t\t\t       depCfg:
+        \ openshiftVerifyDeployment(namespace: 'baloise-dev',\n\t\t\t\t       depCfg:
         'cotd-app',\n\t\t\t\t       replicaCount:'1',\n\t\t\t\t       verifyReplicaCount:
         'true',\n\t\t\t\t       waitTime: '300000')\n  \n  stage 'deploy in test'\n
-        \ openshiftTag(namespace: 'labs-dev',\n  \t\t\t  sourceStream: 'cotd-app',\n\t\t\t
+        \ openshiftTag(namespace: 'baloise-dev',\n  \t\t\t  sourceStream: 'cotd-app',\n\t\t\t
         \ sourceTag: 'latest',\n\t\t\t  destinationStream: 'cotd-app',\n\t\t\t  destinationTag:
-        'promoteQA')\n  \n  openshiftDeploy(namespace: 'labs-test',\n  \t\t\t     deploymentConfig:
-        'cotd-app',\n\t\t\t     waitTime: '300000')\n\n  openshiftScale(namespace: 'labs-test',\n
+        'promoteQA')\n  \n  openshiftDeploy(namespace: 'baloise-test',\n  \t\t\t     deploymentConfig:
+        'cotd-app',\n\t\t\t     waitTime: '300000')\n\n  openshiftScale(namespace: 'baloise-test',\n
         \ \t\t\t     deploymentConfig: 'cotd-app',\n\t\t\t     waitTime: '300000',\n\t\t\t
         \    replicaCount: '2')\n  \n  stage 'verify deploy in test'\n  openshiftVerifyDeployment(namespace:
-        'labs-test',\n\t\t\t\t       depCfg: 'cotd-app',\n\t\t\t\t       replicaCount:'2',\n\t\t\t\t
+        'baloise-test',\n\t\t\t\t       depCfg: 'cotd-app',\n\t\t\t\t       replicaCount:'2',\n\t\t\t\t
         \      verifyReplicaCount: 'true',\n\t\t\t\t       waitTime: '300000')\n  \n
         \ stage 'Deploy to production'\n  timeout(time: 2, unit: 'DAYS') {\n      input
         message: 'Approve to production?'\n }\n\n  openshiftTag(namespace:
-        'labs-dev',\n  \t\t\t  sourceStream: 'cotd-app',\n\t\t\t  sourceTag: 'promoteQA',\n\t\t\t
+        'baloise-dev',\n  \t\t\t  sourceStream: 'cotd-app',\n\t\t\t  sourceTag: 'promoteQA',\n\t\t\t
         \ destinationStream: 'cotd-app',\n\t\t\t  destinationTag: 'promotePRD')\n\n  \n
-        \ openshiftDeploy(namespace: 'labs-prod',\n  \t\t\t     deploymentConfig:
+        \ openshiftDeploy(namespace: 'baloise-prod',\n  \t\t\t     deploymentConfig:
         'cotd-app',\n\t\t\t     waitTime: '300000')\n  \n  openshiftScale(namespace:
-        'labs-prod',\n  \t\t\t     deploymentConfig: 'cotd-app',\n\t\t\t     waitTime:
+        'baloise-prod',\n  \t\t\t     deploymentConfig: 'cotd-app',\n\t\t\t     waitTime:
         '300000',\n\t\t\t     replicaCount: '2')\n  \n  stage 'verify deploy in production'\n
-        \ openshiftVerifyDeployment(namespace: 'labs-prod',\n\t\t\t\t       depCfg:
+        \ openshiftVerifyDeployment(namespace: 'baloise-prod',\n\t\t\t\t       depCfg:
         'cotd-app',\n\t\t\t\t       replicaCount:'2',\n\t\t\t\t       verifyReplicaCount:
         'true',\n\t\t\t\t       waitTime: '300000')\n}"
     type: JenkinsPipeline
